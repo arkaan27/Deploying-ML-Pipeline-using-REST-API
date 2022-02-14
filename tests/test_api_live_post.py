@@ -1,6 +1,6 @@
 import requests
 
-api_endpoint = "https://ml-model-fast-api.herokuapp.com/"
+api_endpoint = "https://ml-model-app-new.herokuapp.com/"
 
 payload = {
     "age": 39,
