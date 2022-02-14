@@ -1,33 +1,11 @@
-# Put the code for your API here.
+from fastapi import FastAPI
+from pydantic import BaseModel
 
 import os
+import joblib
 import pickle
-import pandas as pd
 import numpy as np
-
-from typing import Optional
-
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
-
-
-app = FastAPI()
-
-cols = 'age,workclass,fnlgt,education,education-num,marital-status,occupation,relationship,race,sex,capital-gain,capital-loss,hours-per-week,native-country'.replace('-', '_').split(',')
-cat_features = [
-    "workclass",
-    "education",
-    "marital_status",
-    "occupation",
-    "relationship",
-    "race",
-    "sex",
-    "native_country",
-]
-
-
-model_pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model/model.pkl')
-encoder_pth = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'model/encoder.pkl')
+import pandas as pd
 
 
 if "DYNO" in os.environ and os.path.isdir(".dvc"):
@@ -36,46 +14,88 @@ if "DYNO" in os.environ and os.path.isdir(".dvc"):
         exit("dvc pull failed")
     os.system("rm -r .dvc .apt/usr/lib/dvc")
 
-with open(model_pth, 'rb') as f:
-    model = pickle.load(f)
-with open(encoder_pth, 'rb') as f:
-    encoder = pickle.load(f)
+app = FastAPI()
 
-class DataItem(BaseModel):
-    age           : int
-    fnlgt         : int
-    education_num : int = Field(alias='education-num')
-    capital_gain  : int = Field(alias='capital-gain')
-    capital_loss  : int = Field(alias='capital-loss')
-    hours_per_week: int = Field(alias='hours-per-week')
-    workclass     : str
-    education     : str
-    marital_status: str = Field(alias='marital-status')
-    occupation    : str
-    relationship  : str
-    race          : str
-    sex           : str
-    native_country: str = Field(alias='native-country')
+
+class inputSample(BaseModel):
+    """Input data object for model inference"""
+
+    age: int
+    workclass: str
+    fnlgt: int
+    education: str
+    education_num: int
+    marital_status: str
+    occupation: str
+    relationship: str
+    race: str
+    sex: str
+    capital_gain: float
+    capital_loss: float
+    hours_per_week: float
+    native_country: str
+
+    class Config:
+        schema_extra = {
+            "example": {
+                "age": 39,
+                "workclass": "State-gov",
+                "fnlgt": 77516,
+                "education": "Bachelors",
+                "education_num": 13,
+                "marital_status": "Never-married",
+                "occupation": "Adm-clerical",
+                "relationship": "Not-in-family",
+                "race": "White",
+                "sex": "Male",
+                "capital_gain": 2174,
+                "capital_loss": 0,
+                "hours_per_week": 40,
+                "native_country": "United-States",
+            }
+        }
 
 
 @app.get("/")
-def read_root():
-    return {"Welcome": "Home"}
+async def welcome():
+    """GET method for giving a welcome message."""
+    return {"greeting": "Welcome to my model !"}
 
 
 @app.post("/predict")
-def predict_salary_level(item: DataItem):
-    item_dict = item.dict()
-    X = pd.DataFrame([[item_dict[col] for col in cols]], columns=cols)
+async def model_inference(data: inputSample):
+    """POST method for model inference"""
 
-    X_categorical = X[cat_features].values
-    X_continuous = X.drop(*[cat_features], axis=1)
+    # get encoder, trained model
+    dirname = os.path.dirname(__file__)
+    encoder = joblib.load(os.path.join(dirname, "model/encoder.joblib"))
+    model = joblib.load(os.path.join(dirname, "model/model.joblib"))
 
+    # handle the hyphen stuff here
+    sample = {}
+    for d in data:
+        sample[d[0].replace("_", "-")] = [d[1]]
+    sample = pd.DataFrame.from_dict(sample)
+
+    # encoding the input
+    cat_features = [
+        "workclass",
+        "education",
+        "marital-status",
+        "occupation",
+        "relationship",
+        "race",
+        "sex",
+        "native-country",
+    ]
+    X_categorical = sample[cat_features].values
+    X_continuous = sample.drop(*[cat_features], axis=1)
     X_categorical = encoder.transform(X_categorical)
-
     X = np.concatenate([X_continuous, X_categorical], axis=1)
 
+    # inference
+    pred = model.predict(X)
+    res = "<=50K" if pred[0] == 0 else ">50K"
 
-    pred = int(model.predict(X)[0])
-
-    return {"prediction": pred}
+    # turn prediction into JSON
+    return {"prediction": res}
