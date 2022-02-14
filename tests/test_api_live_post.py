@@ -1,6 +1,6 @@
 import requests
 
-api_endpoint = "https://project3-hcc-cd.herokuapp.com/"
+api_endpoint = "https://Deploying-ML-Pipeline-using-REST-API.herokuapp.com/"
 
 payload = {
     "age": 39,
