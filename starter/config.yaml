@@ -1,9 +1,0 @@
-main:
-  components_repository: "https://github.com/arkaan27/Deploying-ML-Pipeline-using-REST-API.git#components"
-  # All the intermediate files will be copied to this directory at the end of the run.
-  # Set this to null if you are running in prod
-  project_name: Deploying_ML_Model_With_FASTAPI
-  experiment_name: development
-  steps: all
-etl:
-  sample: "census.csv"
