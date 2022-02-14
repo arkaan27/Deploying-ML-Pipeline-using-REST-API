@@ -1,5 +1,6 @@
 [core]
     remote = s3
     autostage = true
+    no_scm = true
 ['remote "s3"']
     url = s3://polestar20121/data
