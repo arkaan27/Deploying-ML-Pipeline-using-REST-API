@@ -1,6 +1,5 @@
 [core]
-    remote = myremote
-    hardlink_lock = true
-['remote "myremote"']
-    url = s3://polestar2012/data
-    region = eu-west-1
+    remote = s3
+    autostage = true
+['remote "s3"']
+    url = s3://polestar20121/data
