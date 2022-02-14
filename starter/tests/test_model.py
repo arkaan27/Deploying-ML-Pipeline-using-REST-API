@@ -1,6 +1,6 @@
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.preprocessing import LabelBinarizer, OneHotEncoder
-from starter.starter.ml.model import train_model, compute_model_metrics, inference
+from starter.starter.ml.model import compute_model_metrics,train_model,inference
 
 
 def test_process_data(processedTrain):
