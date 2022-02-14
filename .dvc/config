@@ -1,4 +1,4 @@
 [core]
-    remote = local_remote
-['remote "local_remote"']
-    url = ../local_remote
+    autostage = true
+['remote "myremote"']
+    url = s3://polestar2012
