@@ -6,7 +6,7 @@ from starter.starter.ml.data import process_data
 from starter.starter.ml.model import train_model
 
 from fastapi.testclient import TestClient
-from starter.main import app
+from main import app
 
 
 @pytest.fixture()
