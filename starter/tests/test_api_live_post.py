@@ -1,6 +1,6 @@
 import requests
 
-api_endpoint = "https://Deploying-ML-Pipeline-using-REST-API.herokuapp.com/"
+api_endpoint = "https://ml-model-fast-api/deploy.herokuapp.com/"
 
 payload = {
     "age": 39,
