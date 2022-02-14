@@ -8,7 +8,7 @@ import joblib
 import pandas as pd
 from ml.data import process_data
 from ml.model import compute_model_metrics, inference, train_model
-from data_slicing import data_slicing_categorical
+from data_slice import data_slicing_categorical
 
 # Add code to load in the data.
 dirname = os.path.dirname(__file__)
